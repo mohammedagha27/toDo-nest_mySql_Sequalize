@@ -1,4 +1,4 @@
-import { TasksDTO } from '../dto/task.dto';
+import { TasksDTO } from '../dto/create-task.dto';
 
 export const tasks: TasksDTO[] = [
   {

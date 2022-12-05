@@ -1,4 +1,12 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsTo,
+  ForeignKey,
+} from 'sequelize-typescript';
+import { User } from '../users/user.entity';
 
 @Table
 export class Task extends Model {
@@ -8,6 +16,13 @@ export class Task extends Model {
     autoIncrement: true,
   })
   id: number;
+
+  @ForeignKey(() => User)
+  @Column
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: User;
 
   @Column({
     type: DataType.STRING,

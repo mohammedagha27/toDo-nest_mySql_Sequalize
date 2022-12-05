@@ -2,7 +2,7 @@ import { Task } from './task.entity';
 
 export const tasksProviders = [
   {
-    provide: 'Tasks_REPOSITORY',
+    provide: 'TASK_REPOSITORY',
     useValue: Task,
   },
 ];

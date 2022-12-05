@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { TasksDTO } from './dto/create-task.dto';
 import { tasks } from './mock/tasks-mock';
 import { Task } from './task.entity';
@@ -6,22 +6,24 @@ import { Task } from './task.entity';
 @Injectable()
 export class TasksService {
   constructor(
-    @Inject('Tasks_REPOSITORY') private tasksRepository: typeof Task,
+    @Inject('TASK_REPOSITORY') private tasksRepository: typeof Task,
   ) {}
   tasksData = tasks;
 
-  async createTask(title: string): Promise<Task> {
-    return await this.tasksRepository.create<Task>({ title });
+  async createTask({ title, userId }): Promise<Task> {
+    return await this.tasksRepository.create<Task>({ title, userId });
   }
 
   async findAll(): Promise<Task[]> {
     return this.tasksRepository.findAll();
   }
   async deleteTask(id: number) {
-    return this.tasksRepository.destroy({ where: { id } });
+    const deletedCount = await this.tasksRepository.destroy({ where: { id } });
+    if (!deletedCount) throw new NotFoundException('task not found');
+    return 'Task deleted';
   }
-  markAsDone(id: number) {
-    return this.tasksRepository.update(
+  async markAsDone(id: number) {
+    const UpdatedCount = await this.tasksRepository.update(
       {
         status: 'done',
       },
@@ -29,5 +31,10 @@ export class TasksService {
         where: { id },
       },
     );
+    if (!UpdatedCount[0]) throw new NotFoundException('Task not Found');
+    return 'Task updated';
+  }
+  async findAllWhere(where: any) {
+    return await this.tasksRepository.findAll(where);
   }
 }

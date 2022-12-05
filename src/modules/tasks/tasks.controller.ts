@@ -8,11 +8,9 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UsePipes,
 } from '@nestjs/common';
-import { TaskSchema } from './dto/task.dto';
+import { TasksDTO } from './dto/create-task.dto';
 import { TasksService } from './tasks.service';
-import { JoiValidationPipe } from './validation.pipe';
 
 @Controller('tasks')
 export class TasksController {
@@ -22,20 +20,16 @@ export class TasksController {
     return this.taskService.findAll();
   }
   @Post()
-  @UsePipes(new JoiValidationPipe(TaskSchema))
-  async addTask(@Body() body: { title: string }) {
-    return this.taskService.createTask(body.title);
+  async addTask(@Body() body: TasksDTO) {
+    const { title, userId } = body;
+    return this.taskService.createTask({ title, userId });
   }
   @Delete(':id')
   async deleteTask(@Param('id', ParseIntPipe) id: number) {
-    const res = await this.taskService.deleteTask(id);
-    if (!res) throw new BadRequestException('Task not Found');
-    return 'Task deleted';
+    return await this.taskService.deleteTask(id);
   }
   @Patch(':id')
   async markAsDone(@Param('id', ParseIntPipe) id: number) {
-    const res = await this.taskService.markAsDone(id);
-    if (!res[0]) throw new BadRequestException('Task not Found');
-    return 'Task updated';
+    return await this.taskService.markAsDone(id);
   }
 }

@@ -1,12 +1,9 @@
-import { IsNotEmpty, IsEnum } from 'class-validator';
-enum taskStatus {
-  done = 'done',
-  todo = 'FEMALE',
-}
+import { IsNotEmpty, IsNumber } from 'class-validator';
 export class TasksDTO {
   id?: number;
   @IsNotEmpty()
+  userId: number;
+  @IsNotEmpty()
   title: string;
-  @IsEnum(taskStatus)
   status?: string;
 }

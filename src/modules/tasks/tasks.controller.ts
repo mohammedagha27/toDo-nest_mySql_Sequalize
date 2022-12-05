@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -20,9 +19,8 @@ export class TasksController {
     return this.taskService.findAll();
   }
   @Post()
-  async addTask(@Body() body: TasksDTO) {
-    const { title, userId } = body;
-    return this.taskService.createTask({ title, userId });
+  async addTask(@Body() TasksDTO: TasksDTO) {
+    return this.taskService.createTask(TasksDTO);
   }
   @Delete(':id')
   async deleteTask(@Param('id', ParseIntPipe) id: number) {

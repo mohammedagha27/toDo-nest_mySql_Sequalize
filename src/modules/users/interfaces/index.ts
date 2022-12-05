@@ -1,4 +1,4 @@
-export interface ApiResponse {
+export interface AuthApiResponse {
   token: string;
   id: number;
   username: string;

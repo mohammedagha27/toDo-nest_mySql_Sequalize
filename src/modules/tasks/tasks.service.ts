@@ -1,16 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { TASK_REPOSITORY } from 'src/common/constants';
 import { TasksDTO } from './dto/create-task.dto';
-import { tasks } from './mock/tasks-mock';
-import { Task } from './task.entity';
+import { Task } from './task.model';
 
 @Injectable()
 export class TasksService {
-  constructor(
-    @Inject('TASK_REPOSITORY') private tasksRepository: typeof Task,
-  ) {}
-  tasksData = tasks;
-
-  async createTask({ title, userId }): Promise<Task> {
+  constructor(@Inject(TASK_REPOSITORY) private tasksRepository: typeof Task) {}
+  async createTask(TasksDTO: TasksDTO): Promise<Task> {
+    const { title, userId } = TasksDTO;
     return await this.tasksRepository.create<Task>({ title, userId });
   }
 

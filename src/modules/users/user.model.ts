@@ -6,7 +6,7 @@ import {
   HasMany,
   PrimaryKey,
 } from 'sequelize-typescript';
-import { Task } from '../tasks/task.entity';
+import { Task } from '../tasks/task.model';
 
 @Table
 export class User extends Model<User> {

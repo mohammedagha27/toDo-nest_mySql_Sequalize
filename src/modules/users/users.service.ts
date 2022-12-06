@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { User } from './user.model';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { Task } from '../tasks/task.model';
 import { TasksService } from '../tasks/tasks.service';
 import { AuthApiResponse } from './interfaces';
 import { UserDto } from './dto/user.dto';
 import { USER_REPOSITORY } from 'src/common/constants';
+import { checkPassword, hashPassword } from 'src/common/utils';
 
 @Injectable()
 export class UsersService {
@@ -22,18 +22,23 @@ export class UsersService {
   ) {}
 
   async create(UserDto: UserDto): Promise<AuthApiResponse> {
-    const hashedPassword = await bcrypt.hash(UserDto.password, 10);
     const res = await this.userRepository.findOne({
       where: { username: UserDto.username },
     });
+
     if (res)
       throw new ConflictException(
         `User with username ${UserDto.username} already exists`,
       );
+
+    const hashedPassword = await hashPassword(UserDto.password);
     const user = { username: UserDto.username, password: hashedPassword };
     const { id, username, createdAt, updatedAt } =
       await this.userRepository.create<User>(user);
-    const token = this.jwtService.sign({ sub: user.username });
+    const token = this.jwtService.sign({
+      id,
+      username,
+    });
     return {
       id,
       username,
@@ -50,10 +55,13 @@ export class UsersService {
     if (!user)
       throw new BadRequestException('username or password is incorrect');
     const { createdAt, updatedAt, id } = user;
-    const checkPass = await bcrypt.compare(password, user.password);
+    const checkPass = await checkPassword(password, user.password);
     if (!checkPass)
       throw new BadRequestException('username or password is incorrect');
-    const token = this.jwtService.sign({ sub: user.username });
+    const token = this.jwtService.sign({
+      id: user.id,
+      username: user.username,
+    });
     return { token, createdAt, updatedAt, id, username };
   }
   async allTasks(id: number): Promise<Task[]> {

@@ -8,10 +8,7 @@ import { TasksModule } from '../tasks/tasks.module';
 @Module({
   providers: [UsersService, ...usersProviders],
   exports: [UsersService],
-  imports: [
-    TasksModule,
-    JwtModule.register({ secret: process.env.SECRET_KEY }),
-  ],
+  imports: [JwtModule.register({ secret: process.env.SECRET_KEY })],
   controllers: [UsersController],
 })
 export class UsersModule {}

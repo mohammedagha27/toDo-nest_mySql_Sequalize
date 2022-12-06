@@ -1,37 +1,49 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { TASK_REPOSITORY } from 'src/common/constants';
+import { AuthenticatedUser } from 'src/common/interfaces';
 import { TasksDTO } from './dto/create-task.dto';
 import { Task } from './task.model';
 
 @Injectable()
 export class TasksService {
   constructor(@Inject(TASK_REPOSITORY) private tasksRepository: typeof Task) {}
-  async createTask(TasksDTO: TasksDTO): Promise<Task> {
-    const { title, userId } = TasksDTO;
-    return await this.tasksRepository.create<Task>({ title, userId });
+  async createTask(TasksDTO: TasksDTO, userId: number): Promise<Task> {
+    const { title } = TasksDTO;
+    return await this.tasksRepository.create<Task>({ title, userId: userId });
   }
 
-  async findAll(): Promise<Task[]> {
-    return this.tasksRepository.findAll();
+  async findAll(userId: number): Promise<Task[]> {
+    return this.tasksRepository.findAll({ where: { userId } });
   }
-  async deleteTask(id: number) {
-    const deletedCount = await this.tasksRepository.destroy({ where: { id } });
-    if (!deletedCount) throw new NotFoundException('task not found');
+  async deleteTask(taskId: number, userId: number) {
+    const task = await this.findUserTaskById(taskId, userId);
+    await task.destroy();
     return 'Task deleted';
   }
-  async markAsDone(id: number) {
-    const UpdatedCount = await this.tasksRepository.update(
+  async markAsDone(taskId: number, userId: number) {
+    const task = await this.findUserTaskById(taskId, userId);
+    task.update(
       {
         status: 'done',
       },
       {
-        where: { id },
+        where: { id: taskId },
       },
     );
-    if (!UpdatedCount[0]) throw new NotFoundException('Task not Found');
     return 'Task updated';
   }
   async findAllWhere(where: any) {
     return await this.tasksRepository.findAll(where);
+  }
+  async findUserTaskById(taskId: number, userId: number) {
+    const task = await this.tasksRepository.findByPk(taskId);
+    if (!task) throw new NotFoundException('task not found');
+    if (task.userId !== userId) throw new ForbiddenException();
+    return task;
   }
 }

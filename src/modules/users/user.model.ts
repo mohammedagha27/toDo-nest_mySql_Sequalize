@@ -1,3 +1,4 @@
+import { IsEnum } from 'class-validator';
 import {
   Table,
   Column,
@@ -29,6 +30,11 @@ export class User extends Model<User> {
     allowNull: false,
   })
   password: string;
+
+  @Column
+  @IsEnum(['admin', 'user'])
+  role: string;
+
   @HasMany(() => Task)
   tasks: Task[];
 }

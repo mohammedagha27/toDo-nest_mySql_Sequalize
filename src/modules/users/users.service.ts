@@ -6,8 +6,6 @@ import {
 } from '@nestjs/common';
 import { User } from './user.model';
 import { JwtService } from '@nestjs/jwt';
-import { Task } from '../tasks/task.model';
-import { TasksService } from '../tasks/tasks.service';
 import { AuthApiResponse } from './interfaces';
 import { UserDto } from './dto/user.dto';
 import { USER_REPOSITORY } from 'src/common/constants';
@@ -17,7 +15,6 @@ import { checkPassword, hashPassword } from 'src/common/utils';
 export class UsersService {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: typeof User,
-    private readonly tasksService: TasksService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -32,18 +29,24 @@ export class UsersService {
       );
 
     const hashedPassword = await hashPassword(UserDto.password);
-    const user = { username: UserDto.username, password: hashedPassword };
-    const { id, username, createdAt, updatedAt } =
+    const user = {
+      username: UserDto.username,
+      password: hashedPassword,
+      role: 'admin',
+    };
+    const { id, username, createdAt, updatedAt, role } =
       await this.userRepository.create<User>(user);
     const token = this.jwtService.sign({
       id,
       username,
+      role,
     });
     return {
       id,
       username,
       createdAt,
       updatedAt,
+      role,
       token,
     };
   }
@@ -54,20 +57,18 @@ export class UsersService {
     });
     if (!user)
       throw new BadRequestException('username or password is incorrect');
-    const { createdAt, updatedAt, id } = user;
+    const { createdAt, updatedAt, id, role } = user;
     const checkPass = await checkPassword(password, user.password);
     if (!checkPass)
       throw new BadRequestException('username or password is incorrect');
     const token = this.jwtService.sign({
       id: user.id,
       username: user.username,
+      role,
     });
-    return { token, createdAt, updatedAt, id, username };
+    return { token, createdAt, updatedAt, id, username, role };
   }
-  async allTasks(id: number): Promise<Task[]> {
-    const data = await this.tasksService.findAllWhere({
-      where: { userId: id },
-    });
-    return data;
+  async getUserByUserName(username: string): Promise<UserDto> {
+    return await this.userRepository.findOne({ where: { username } });
   }
 }

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { verifyToken } from 'src/common/utils';
 
 @Injectable()
-export class UsersGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {

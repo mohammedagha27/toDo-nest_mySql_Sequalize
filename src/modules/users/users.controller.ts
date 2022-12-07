@@ -6,11 +6,13 @@ import { AuthApiResponse } from './interfaces';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Post('auth/signup')
+
+  @Post('signup')
   async signup(@Body() UserDto: UserDto): Promise<AuthApiResponse> {
     return await this.usersService.create(UserDto);
   }
-  @Post('auth/login')
+
+  @Post('login')
   async login(@Body() user: UserDto): Promise<AuthApiResponse> {
     return await this.usersService.login(user.username, user.password);
   }

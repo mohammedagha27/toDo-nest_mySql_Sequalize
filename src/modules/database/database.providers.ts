@@ -1,37 +1,20 @@
+import { ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { Task } from 'src/modules/tasks/task.model';
 import { User } from 'src/modules/users/user.model';
-import { databaseConfig } from 'config/database.config';
 import * as dotenv from 'dotenv';
+import { DATABASE, SEQUELIZE } from 'src/common/constants';
 dotenv.config();
-
 export const databaseProviders = [
   {
-    provide: 'SEQUELIZE',
-    useFactory: async () => {
-      let config;
-      switch (process.env.NODE_ENV) {
-        case 'DEVELOPMENT':
-          config = databaseConfig.development;
-          break;
-        case 'TEST':
-          config = databaseConfig.test;
-          break;
-        case 'PRODUCTION':
-          config = databaseConfig.production;
-          break;
-        default:
-          config = databaseConfig.development;
-      }
+    provide: SEQUELIZE,
+    useFactory: async (configService: ConfigService) => {
       const sequelize = new Sequelize({
-        dialect: 'mysql',
-        host: 'localhost',
-        port: 3306,
-        ...config,
+        ...configService.get(DATABASE),
       });
       sequelize.addModels([Task, User]);
-      await sequelize.sync();
       return sequelize;
     },
+    inject: [ConfigService],
   },
 ];

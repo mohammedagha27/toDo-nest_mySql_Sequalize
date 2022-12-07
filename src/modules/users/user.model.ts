@@ -6,33 +6,32 @@ import {
   DataType,
   HasMany,
   PrimaryKey,
+  IsInt,
+  AutoIncrement,
+  NotNull,
+  AllowNull,
 } from 'sequelize-typescript';
 import { Task } from '../tasks/task.model';
 
 @Table
 export class User extends Model<User> {
   @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  })
+  @IsInt
+  @AutoIncrement
+  @Column(DataType.INTEGER)
   id: number;
 
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
+  @AllowNull(false)
+  @Column(DataType.STRING)
   username: string;
 
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
+  @AllowNull(false)
+  @Column(DataType.STRING)
   password: string;
 
-  @Column
+  @AllowNull(false)
   @IsEnum(['admin', 'user'])
+  @Column
   role: string;
 
   @HasMany(() => Task)

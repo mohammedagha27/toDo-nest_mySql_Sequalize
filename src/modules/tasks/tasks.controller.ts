@@ -7,21 +7,25 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards,
-  Req,
+  Query,
 } from '@nestjs/common';
 import { TasksDTO } from './dto/create-task.dto';
 import { TasksService } from './tasks.service';
 import { User } from 'src/common/decorators';
 import { Auth } from 'src/common/decorators';
+
 @Controller('tasks')
 export class TasksController {
   constructor(private taskService: TasksService) {}
 
   @Auth('admin')
   @Get()
-  async getAllTasks(@User('id') userId: number) {
-    return this.taskService.findAll(userId);
+  async getAllTasks(
+    @User('id') userId: number,
+    @Query('offset') offset?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.taskService.findAll(userId, offset, limit);
   }
 
   @Auth('admin')
@@ -50,6 +54,16 @@ export class TasksController {
 
   @Auth('admin')
   @Patch(':id')
+  async updateTask(
+    @Param('id', ParseIntPipe) id: number,
+    @User('id') userId: number,
+    @Body('title') title: string,
+  ) {
+    return await this.taskService.updateTaskTitle(id, userId, title);
+  }
+
+  @Auth('admin')
+  @Patch('/mark-done/:id')
   async markAsDone(
     @Param('id', ParseIntPipe) id: number,
     @User('id') userId: number,

@@ -34,13 +34,16 @@ export class UsersService {
       password: hashedPassword,
       role: 'admin',
     };
+
     const { id, username, createdAt, updatedAt, role } =
       await this.userRepository.create<User>(user);
+
     const token = this.jwtService.sign({
       id,
       username,
       role,
     });
+
     return {
       id,
       username,
@@ -55,19 +58,25 @@ export class UsersService {
     const user = await this.userRepository.findOne<User>({
       where: { username },
     });
+
     if (!user)
       throw new BadRequestException('username or password is incorrect');
+
     const { createdAt, updatedAt, id, role } = user;
     const checkPass = await checkPassword(password, user.password);
+
     if (!checkPass)
       throw new BadRequestException('username or password is incorrect');
+
     const token = this.jwtService.sign({
       id: user.id,
       username: user.username,
       role,
     });
+
     return { token, createdAt, updatedAt, id, username, role };
   }
+
   async getUserByUserName(username: string): Promise<UserDto> {
     return await this.userRepository.findOne({ where: { username } });
   }

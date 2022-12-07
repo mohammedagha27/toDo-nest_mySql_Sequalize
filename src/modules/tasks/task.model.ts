@@ -1,3 +1,4 @@
+import { IsEnum } from 'class-validator';
 import {
   Table,
   Column,
@@ -5,16 +6,20 @@ import {
   DataType,
   BelongsTo,
   ForeignKey,
+  PrimaryKey,
+  IsInt,
+  AutoIncrement,
+  AllowNull,
+  Default,
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
 
 @Table
 export class Task extends Model {
-  @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  })
+  @PrimaryKey
+  @IsInt
+  @AutoIncrement
+  @Column(DataType.INTEGER)
   id: number;
 
   @ForeignKey(() => User)
@@ -23,17 +28,13 @@ export class Task extends Model {
 
   @BelongsTo(() => User)
   user: User;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
+  @AllowNull(false)
+  @Column(DataType.STRING)
   title: number;
 
-  @Column({
-    type: DataType.ENUM,
-    values: ['todo', 'done'],
-    defaultValue: 'todo',
-  })
+  @AllowNull(false)
+  @IsEnum(['todo', 'done'])
+  @Default('todo')
+  @Column
   status: string;
 }

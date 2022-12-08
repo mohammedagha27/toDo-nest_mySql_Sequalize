@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Transaction } from 'sequelize';
 import { TASK_REPOSITORY } from 'src/common/constants';
 import { TasksDTO } from './dto/create-task.dto';
 import { Task } from './task.model';
@@ -13,9 +14,16 @@ import { Task } from './task.model';
 export class TasksService {
   constructor(@Inject(TASK_REPOSITORY) private tasksRepository: typeof Task) {}
 
-  async createTask(TasksDTO: TasksDTO, userId: number): Promise<Task> {
+  async createTask(
+    TasksDTO: TasksDTO,
+    userId: number,
+    transaction: Transaction,
+  ): Promise<Task> {
     const { title } = TasksDTO;
-    return await this.tasksRepository.create<Task>({ title, userId: userId });
+    return await this.tasksRepository.create<Task>(
+      { title, userId: userId },
+      { transaction },
+    );
   }
 
   async findAll(userId: number, qOffset: number, qLimit: number): Promise<any> {
@@ -31,22 +39,27 @@ export class TasksService {
     return { data, pageInfo: { offset, limit } };
   }
 
-  async deleteTask(taskId: number, userId: number): Promise<void> {
+  async deleteTask(taskId: number, userId: number, transaction): Promise<void> {
     const task = await this.findUserTaskById(taskId, userId);
-    await task.destroy();
+    await task.destroy({ transaction });
     return;
   }
 
-  async updateTaskTitle(taskId: number, userId: number, title: string) {
+  async updateTaskTitle(
+    taskId: number,
+    userId: number,
+    title: string,
+    transaction: Transaction,
+  ) {
     const task = await this.findUserTaskById(taskId, userId);
     if (!title) throw new BadRequestException('title must not be empty');
-    task.update({ title });
+    task.update({ title }, { transaction });
     return task;
   }
 
-  async markAsDone(taskId: number, userId: number) {
+  async markAsDone(taskId: number, userId: number, transaction: Transaction) {
     const task = await this.findUserTaskById(taskId, userId);
-    task.update({ status: 'done' }, { where: { id: taskId } });
+    task.update({ status: 'done' }, { where: { id: taskId }, transaction });
     return task;
   }
 

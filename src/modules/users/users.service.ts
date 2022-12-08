@@ -10,6 +10,7 @@ import { AuthApiResponse } from './interfaces';
 import { UserDto } from './dto/user.dto';
 import { ADMIN_ROLE, USER_REPOSITORY } from 'src/common/constants';
 import { checkPassword, hashPassword } from 'src/common/utils';
+import { Transaction } from 'sequelize';
 
 @Injectable()
 export class UsersService {
@@ -18,11 +19,11 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(UserDto: UserDto): Promise<AuthApiResponse> {
-    const res = await this.userRepository.findOne({
-      where: { username: UserDto.username },
-    });
-
+  async create(
+    UserDto: UserDto,
+    transaction: Transaction,
+  ): Promise<AuthApiResponse> {
+    const res = await this.findUserByUserName(UserDto.username, transaction);
     if (res)
       throw new ConflictException(
         `User with username ${UserDto.username} already exists`,
@@ -36,7 +37,7 @@ export class UsersService {
     };
 
     const { id, username, createdAt, updatedAt, role } =
-      await this.userRepository.create<User>(user);
+      await this.userRepository.create<User>(user, { transaction });
 
     const token = this.jwtService.sign({
       id,
@@ -53,10 +54,12 @@ export class UsersService {
     };
   }
 
-  async login(username: string, password: string): Promise<AuthApiResponse> {
-    const user = await this.userRepository.findOne<User>({
-      where: { username },
-    });
+  async login(
+    username: string,
+    password: string,
+    transaction: Transaction,
+  ): Promise<AuthApiResponse> {
+    const user = await this.findUserByUserName(username, transaction);
 
     if (!user)
       throw new BadRequestException('username or password is incorrect');
@@ -76,7 +79,13 @@ export class UsersService {
     return { token, createdAt, updatedAt, id, username };
   }
 
-  async getUserByUserName(username: string): Promise<UserDto> {
-    return await this.userRepository.findOne({ where: { username } });
+  async findUserByUserName(
+    username: string,
+    transaction?: Transaction,
+  ): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { username },
+      transaction,
+    });
   }
 }

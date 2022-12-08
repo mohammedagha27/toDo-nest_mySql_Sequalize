@@ -4,5 +4,4 @@ export interface AuthApiResponse {
   username: string;
   createdAt: string;
   updatedAt: string;
-  role: string;
 }

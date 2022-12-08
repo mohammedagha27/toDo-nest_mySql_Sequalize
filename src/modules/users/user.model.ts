@@ -11,6 +11,7 @@ import {
   NotNull,
   AllowNull,
 } from 'sequelize-typescript';
+import { ADMIN_ROLE, USER_ROLE } from 'src/common/constants';
 import { Task } from '../tasks/task.model';
 
 @Table
@@ -30,7 +31,7 @@ export class User extends Model<User> {
   password: string;
 
   @AllowNull(false)
-  @IsEnum(['admin', 'user'])
+  @IsEnum([ADMIN_ROLE, USER_ROLE])
   @Column
   role: string;
 

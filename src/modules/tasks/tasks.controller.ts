@@ -13,12 +13,13 @@ import { TasksDTO } from './dto/create-task.dto';
 import { TasksService } from './tasks.service';
 import { User } from 'src/common/decorators';
 import { Auth } from 'src/common/decorators';
+import { ADMIN_ROLE } from 'src/common/constants';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private taskService: TasksService) {}
 
-  @Auth('admin')
+  @Auth(ADMIN_ROLE)
   @Get()
   async getAllTasks(
     @User('id') userId: number,
@@ -28,7 +29,7 @@ export class TasksController {
     return this.taskService.findAll(userId, offset, limit);
   }
 
-  @Auth('admin')
+  @Auth(ADMIN_ROLE)
   @Get(':taskId')
   async getSingleTask(
     @Param('taskId', ParseIntPipe) taskId: number,
@@ -37,13 +38,13 @@ export class TasksController {
     return this.taskService.findUserTaskById(taskId, userId);
   }
 
-  @Auth('admin')
+  @Auth(ADMIN_ROLE)
   @Post()
   async addTask(@Body() TasksDTO: TasksDTO, @User('id') userId: number) {
     return this.taskService.createTask(TasksDTO, userId);
   }
 
-  @Auth('admin')
+  @Auth(ADMIN_ROLE)
   @Delete(':id')
   async deleteTask(
     @Param('id', ParseIntPipe) id: number,
@@ -52,7 +53,7 @@ export class TasksController {
     return await this.taskService.deleteTask(id, userId);
   }
 
-  @Auth('admin')
+  @Auth(ADMIN_ROLE)
   @Patch(':id')
   async updateTask(
     @Param('id', ParseIntPipe) id: number,
@@ -62,7 +63,7 @@ export class TasksController {
     return await this.taskService.updateTaskTitle(id, userId, title);
   }
 
-  @Auth('admin')
+  @Auth(ADMIN_ROLE)
   @Patch('/mark-done/:id')
   async markAsDone(
     @Param('id', ParseIntPipe) id: number,

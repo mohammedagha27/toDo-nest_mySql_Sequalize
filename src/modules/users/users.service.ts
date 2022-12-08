@@ -8,7 +8,7 @@ import { User } from './user.model';
 import { JwtService } from '@nestjs/jwt';
 import { AuthApiResponse } from './interfaces';
 import { UserDto } from './dto/user.dto';
-import { USER_REPOSITORY } from 'src/common/constants';
+import { ADMIN_ROLE, USER_REPOSITORY } from 'src/common/constants';
 import { checkPassword, hashPassword } from 'src/common/utils';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class UsersService {
     const user = {
       username: UserDto.username,
       password: hashedPassword,
-      role: 'admin',
+      role: ADMIN_ROLE,
     };
 
     const { id, username, createdAt, updatedAt, role } =
@@ -49,7 +49,6 @@ export class UsersService {
       username,
       createdAt,
       updatedAt,
-      role,
       token,
     };
   }
@@ -74,7 +73,7 @@ export class UsersService {
       role,
     });
 
-    return { token, createdAt, updatedAt, id, username, role };
+    return { token, createdAt, updatedAt, id, username };
   }
 
   async getUserByUserName(username: string): Promise<UserDto> {

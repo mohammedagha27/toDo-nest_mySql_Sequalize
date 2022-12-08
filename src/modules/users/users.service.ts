@@ -19,10 +19,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(
-    UserDto: UserDto,
-    transaction: Transaction,
-  ): Promise<AuthApiResponse> {
+  async create(UserDto: UserDto, transaction: Transaction): Promise<any> {
     const res = await this.findUserByUserName(UserDto.username, transaction);
     if (res)
       throw new ConflictException(
@@ -36,47 +33,44 @@ export class UsersService {
       role: ADMIN_ROLE,
     };
 
-    const { id, username, createdAt, updatedAt, role } =
-      await this.userRepository.create<User>(user, { transaction });
-
-    const token = this.jwtService.sign({
-      id,
-      username,
-      role,
+    const createdUser = await this.userRepository.create<User>(user, {
+      transaction,
     });
 
+    const { password, role, ...resData } = createdUser.dataValues;
+
+    const token = this.jwtService.sign({
+      resData,
+      role,
+    });
     return {
-      id,
-      username,
-      createdAt,
-      updatedAt,
+      ...resData,
       token,
     };
   }
 
   async login(
     username: string,
-    password: string,
+    enteredPassword: string,
     transaction: Transaction,
-  ): Promise<AuthApiResponse> {
+  ): Promise<any> {
     const user = await this.findUserByUserName(username, transaction);
 
     if (!user)
       throw new BadRequestException('username or password is incorrect');
 
-    const { createdAt, updatedAt, id, role } = user;
-    const checkPass = await checkPassword(password, user.password);
+    const { password, role, ...resData } = user.dataValues;
+    const checkPass = await checkPassword(enteredPassword, password);
 
     if (!checkPass)
       throw new BadRequestException('username or password is incorrect');
 
     const token = this.jwtService.sign({
-      id: user.id,
-      username: user.username,
+      ...resData,
       role,
     });
 
-    return { token, createdAt, updatedAt, id, username };
+    return { token, ...resData };
   }
 
   async findUserByUserName(

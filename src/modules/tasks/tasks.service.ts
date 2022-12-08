@@ -8,6 +8,7 @@ import {
 import { Transaction } from 'sequelize';
 import { TASK_REPOSITORY } from 'src/common/constants';
 import { TasksDTO } from './dto/create-task.dto';
+import { PageInfoQueryDTO } from './dto/pageInfo.dto';
 import { Task } from './task.model';
 
 @Injectable()
@@ -26,17 +27,19 @@ export class TasksService {
     );
   }
 
-  async findAll(userId: number, qOffset: number, qLimit: number): Promise<any> {
-    const offset = Number(qOffset) || 0;
-    const limit = Number(qLimit) || 10;
-
+  async findAll(
+    userId: number,
+    pageInfoQueryDTO: PageInfoQueryDTO,
+  ): Promise<any> {
+    const { offset, limit } = pageInfoQueryDTO;
+    console.log(limit);
     const data = await this.tasksRepository.findAll({
       where: { userId },
       offset,
       limit,
     });
 
-    return { data, pageInfo: { offset, limit } };
+    return data;
   }
 
   async deleteTask(taskId: number, userId: number, transaction): Promise<void> {

@@ -17,19 +17,21 @@ import { Auth } from 'src/common/decorators';
 import { ADMIN_ROLE } from 'src/common/constants';
 import { TransactionInterceptor } from 'src/common/interceptors';
 import { Transaction } from 'sequelize';
+import { PageInfoQueryDTO } from './dto/pageInfo.dto';
+import { PageInfoInterceptor } from 'src/common/interceptors/pageInfo.interceptor';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private taskService: TasksService) {}
 
   @Auth(ADMIN_ROLE)
+  @UseInterceptors(PageInfoInterceptor)
   @Get()
   async getAllTasks(
     @User('id') userId: number,
-    @Query('offset') offset?: number,
-    @Query('limit') limit?: number,
+    @Query() pageInfoQueryDTO?: PageInfoQueryDTO,
   ) {
-    return this.taskService.findAll(userId, offset, limit);
+    return this.taskService.findAll(userId, pageInfoQueryDTO);
   }
 
   @Auth(ADMIN_ROLE)

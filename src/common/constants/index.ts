@@ -5,3 +5,5 @@ export const USER_REPOSITORY = 'USER_REPOSITORY';
 export const TASK_REPOSITORY = 'TASK_REPOSITORY';
 export const ADMIN_ROLE = 'admin';
 export const USER_ROLE = 'user';
+export const DEFAULT_LIMIT = 10;
+export const DEFAULT_OFFSET = 0;

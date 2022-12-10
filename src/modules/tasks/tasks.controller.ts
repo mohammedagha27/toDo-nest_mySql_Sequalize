@@ -40,7 +40,7 @@ export class TasksController {
     @Param('taskId', ParseIntPipe) taskId: number,
     @User('id') userId: number,
   ) {
-    return this.taskService.findUserTaskById(taskId, userId);
+    return this.taskService.findSingleTask(taskId, userId);
   }
 
   @UseInterceptors(TransactionInterceptor)

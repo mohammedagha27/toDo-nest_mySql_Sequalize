@@ -43,7 +43,8 @@ export class TasksService {
   }
 
   async deleteTask(taskId: number, userId: number, transaction): Promise<void> {
-    const task = await this.findUserTaskById(taskId, userId);
+    const task = await this.findTaskByID(taskId);
+    await this.checkTaskOwner(task, userId);
     await task.destroy({ transaction });
     return;
   }
@@ -54,26 +55,37 @@ export class TasksService {
     title: string,
     transaction: Transaction,
   ) {
-    const task = await this.findUserTaskById(taskId, userId);
+    const task = await this.findTaskByID(taskId);
+    await this.checkTaskOwner(task, userId);
     if (!title) throw new BadRequestException('title must not be empty');
     task.update({ title }, { transaction });
     return task;
   }
 
+  async findSingleTask(id: number, userId: number) {
+    const task = await this.findTaskByID(id);
+    await this.checkTaskOwner(task, userId);
+    return task;
+  }
   async markAsDone(taskId: number, userId: number, transaction: Transaction) {
-    const task = await this.findUserTaskById(taskId, userId);
+    const task = await this.findTaskByID(taskId);
+    await this.checkTaskOwner(task, userId);
     task.update({ status: 'done' }, { where: { id: taskId }, transaction });
+    return task;
+  }
+
+  async findTaskByID(id: number) {
+    const task = await this.tasksRepository.findByPk(id);
+    if (!task) throw new NotFoundException('task not found');
+    return task;
+  }
+
+  async checkTaskOwner(task: Task, userId: number) {
+    if (task.userId !== userId) throw new ForbiddenException();
     return task;
   }
 
   async findAllWhere(where: any) {
     return await this.tasksRepository.findAll(where);
-  }
-
-  async findUserTaskById(taskId: number, userId: number) {
-    const task = await this.tasksRepository.findByPk(taskId);
-    if (!task) throw new NotFoundException('task not found');
-    if (task.userId !== userId) throw new ForbiddenException();
-    return task;
   }
 }

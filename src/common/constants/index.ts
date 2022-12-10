@@ -7,3 +7,4 @@ export const ADMIN_ROLE = 'admin';
 export const USER_ROLE = 'user';
 export const DEFAULT_LIMIT = 10;
 export const DEFAULT_OFFSET = 0;
+export const BAD_LOGIN_MSG = 'username or password is incorrect';

@@ -10,4 +10,9 @@ export default () => ({
     password: process.env.DB_PASS,
     database: process.env.DB_NAME_DEV,
   },
+  environment: {
+    port: process.env.PORT,
+    nodeEnv: process.env.NODE_ENV,
+    secretKey: process.env.SECRET_KEY,
+  },
 });

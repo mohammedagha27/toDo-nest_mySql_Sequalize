@@ -6,9 +6,12 @@ import {
 } from '@nestjs/common';
 import { User } from './user.model';
 import { JwtService } from '@nestjs/jwt';
-import { AuthApiResponse } from './interfaces';
 import { UserDto } from './dto/user.dto';
-import { ADMIN_ROLE, USER_REPOSITORY } from 'src/common/constants';
+import {
+  ADMIN_ROLE,
+  BAD_LOGIN_MSG,
+  USER_REPOSITORY,
+} from 'src/common/constants';
 import { checkPassword, hashPassword } from 'src/common/utils';
 import { Transaction } from 'sequelize';
 
@@ -56,14 +59,12 @@ export class UsersService {
   ): Promise<any> {
     const user = await this.findUserByUserName(username, transaction);
 
-    if (!user)
-      throw new BadRequestException('username or password is incorrect');
+    if (!user) throw new BadRequestException(BAD_LOGIN_MSG);
 
     const { password, role, ...resData } = user.dataValues;
     const checkPass = await checkPassword(enteredPassword, password);
 
-    if (!checkPass)
-      throw new BadRequestException('username or password is incorrect');
+    if (!checkPass) throw new BadRequestException(BAD_LOGIN_MSG);
 
     const token = this.jwtService.sign({
       ...resData,
